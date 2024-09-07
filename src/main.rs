@@ -1,10 +1,6 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-};
-
 use anyhow::{Context, Result};
 use clap::Parser;
+use grrs::find_matches;
 
 #[derive(Parser)]
 struct Cli {
@@ -14,15 +10,9 @@ struct Cli {
 
 fn main() -> Result<()> {
     let args = Cli::parse();
-    let file = File::open(&args.path)
+    let content = std::fs::read_to_string(&args.path)
         .with_context(|| format!("could not read file `{}`", args.path.display()))?;
-    let reader = BufReader::new(file);
 
-    for line in reader.lines() {
-        let line = line?;
-        if line.contains(&args.pattern) {
-            println!("{}", line);
-        }
-    }
+    let _ = find_matches(&content, &args.pattern, &mut std::io::stdout());
     Ok(())
 }
